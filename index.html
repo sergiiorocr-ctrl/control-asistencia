@@ -1,262 +1,1016 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>Control de Asistencia</title>
 
+  <!-- Lector de códigos QR -->
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
+
       margin: 0;
-      font-family: Arial, sans-serif;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
       background: #f2f2f2;
+
       text-align: center;
+
+      color: #222;
     }
 
     .contenedor {
+
+      width: 100%;
+
       max-width: 500px;
+
       margin: auto;
+
       padding: 20px;
     }
 
     h1 {
-      margin-bottom: 5px;
+
+      margin:
+
+        5px
+        0
+        5px
+        0;
+
+      font-size: 27px;
     }
 
     .subtitulo {
+
       color: #666;
+
       margin-bottom: 20px;
+
+      font-size: 17px;
     }
 
     #reader {
+
       width: 100%;
+
       max-width: 450px;
+
       margin: auto;
+
       background: white;
+
       border-radius: 15px;
+
       overflow: hidden;
+
+      box-shadow:
+        0 2px 8px
+        rgba(0,0,0,0.10);
     }
 
     #resultado {
+
       margin-top: 20px;
-      padding: 20px;
+
+      padding: 22px;
+
       border-radius: 15px;
+
       background: white;
-      min-height: 100px;
+
+      min-height: 145px;
+
+      box-shadow:
+        0 2px 8px
+        rgba(0,0,0,0.08);
     }
 
     .nombre {
+
       font-size: 25px;
+
       font-weight: bold;
+
+      margin-bottom: 5px;
     }
 
     .id {
+
       color: #666;
+
       font-size: 18px;
+
       margin-top: 5px;
     }
 
     .tipo {
+
       font-size: 32px;
+
       font-weight: bold;
+
       margin-top: 15px;
     }
 
     .hora {
+
       font-size: 20px;
+
       margin-top: 8px;
     }
 
     .entrada {
+
       color: #188038;
     }
 
     .salida {
+
       color: #d93025;
     }
 
     .revisar {
+
       color: #f29900;
     }
 
     .error {
+
       color: #d93025;
+
       font-weight: bold;
+
+      font-size: 20px;
     }
 
     .esperando {
+
       color: #777;
+
       font-size: 18px;
     }
+
+    .confirmacion {
+
+      margin-top: 15px;
+
+      color: #555;
+
+      font-size: 17px;
+    }
+
+    button {
+
+      width: 100%;
+
+      max-width: 350px;
+
+      padding: 18px;
+
+      margin-top: 20px;
+
+      border: none;
+
+      border-radius: 12px;
+
+      font-size: 22px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+    }
+
+    #botonRegistrar {
+
+      background: #188038;
+
+      color: white;
+    }
+
+    #botonRegistrar:disabled {
+
+      background: #aaa;
+
+      cursor: not-allowed;
+    }
+
+    #botonSiguiente {
+
+      background: #333;
+
+      color: white;
+    }
+
+    .oculto {
+
+      display: none;
+    }
+
   </style>
+
 </head>
+
 
 <body>
 
+
 <div class="contenedor">
 
-  <h1>CONTROL DE ASISTENCIA</h1>
+
+  <h1>
+    CONTROL DE ASISTENCIA
+  </h1>
+
 
   <div class="subtitulo">
+
     Escanea el código QR del empleado
+
   </div>
+
+
+  <!-- Cámara / lector QR -->
 
   <div id="reader"></div>
 
+
+  <!-- Resultado -->
+
   <div id="resultado">
+
     <div class="esperando">
+
       Esperando QR...
+
     </div>
+
   </div>
+
+
+  <!-- Botón de confirmación -->
+
+  <button
+    id="botonRegistrar"
+    class="oculto"
+    onclick="confirmarRegistro()"
+  >
+
+    REGISTRAR
+
+  </button>
+
+
+  <!-- Botón para continuar -->
+
+  <button
+    id="botonSiguiente"
+    class="oculto"
+    onclick="volverAEscanear()"
+  >
+
+    LISTO / SIGUIENTE
+
+  </button>
+
 
 </div>
 
 
+
 <script>
 
+
+/* =========================================================
+   CONFIGURACIÓN
+   ========================================================= */
+
+
+/*
+ * URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
+ */
+
+const URL_APPS_SCRIPT =
+  "https://script.google.com/macros/s/AKfycbwClqRJkgsM5iVOQqpOJP_YWicN-RII9OGOdxzFmb2BPNEhaa6HcHgWZVkmHSjoMow1/exec";
+
+
+/*
+ * Este es el nombre del parámetro que tienen
+ * tus códigos QR actuales.
+ *
+ * Ejemplo:
+ *
+ * ...entry.1163066923=DEM-025
+ */
+
+const PARAMETRO_ID =
+  "entry.1163066923";
+
+
+/* =========================================================
+   VARIABLES
+   ========================================================= */
+
+
+let scanner = null;
+
+let empleadoDetectado = null;
+
+let procesando = false;
+
+
+/* =========================================================
+   CUANDO SE DETECTA UN QR
+   ========================================================= */
+
+
+function onScanSuccess(decodedText) {
+
+
   /*
-   * AQUÍ VA EL ENLACE DE NUESTRA APLICACIÓN
-   * DE GOOGLE APPS SCRIPT.
-   *
-   * NO LO CAMBIES TODAVÍA.
+   * Si ya detectamos un empleado,
+   * ignoramos cualquier otro QR.
    */
 
-  const URL_APPS_SCRIPT =
-    "https://script.google.com/macros/s/AKfycbwClqRJkgsM5iVOQqpOJP_YWicN-RII9OGOdxzFmb2BPNEhaa6HcHgWZVkmHSjoMow1/exec";
+  if (
+    empleadoDetectado ||
+    procesando
+  ) {
 
+    return;
 
-  let procesando = false;
-
-
-  async function registrarAsistencia(id) {
-
-    try {
-
-      const url =
-        URL_APPS_SCRIPT +
-        "?id=" +
-        encodeURIComponent(id);
-
-      const respuesta = await fetch(url);
-
-      const datos = await respuesta.json();
-
-      mostrarResultado(datos);
-
-    } catch (error) {
-
-      document.getElementById("resultado").innerHTML =
-        '<div class="error">' +
-        'No se pudo registrar. Revisa la conexión.' +
-        '</div>';
-
-    }
-
-    setTimeout(function() {
-      procesando = false;
-    }, 1500);
   }
 
 
-  function mostrarResultado(datos) {
+  let id = decodedText.trim();
 
-    const resultado =
-      document.getElementById("resultado");
 
-    if (!datos.ok) {
+  /*
+   * -------------------------------------------------------
+   * EXTRAER EL ID DEL QR
+   * -------------------------------------------------------
+   *
+   * Tus QR actuales contienen una URL como:
+   *
+   * https://docs.google.com/forms/...
+   *
+   * ...entry.1163066923=DEM-025
+   *
+   * Aquí buscamos automáticamente el ID.
+   */
 
-      resultado.innerHTML =
-        '<div class="error">' +
-        datos.mensaje +
-        '</div>';
+  try {
 
-      return;
+    const url =
+      new URL(id);
+
+
+    const empleadoID =
+      url.searchParams.get(
+        PARAMETRO_ID
+      );
+
+
+    if (empleadoID) {
+
+      id =
+        empleadoID.trim();
+
     }
 
+  }
 
-    let clase = "";
+  catch (error) {
 
-    if (datos.tipo === "Entrada") {
-      clase = "entrada";
-    }
-    else if (datos.tipo === "Salida") {
-      clase = "salida";
-    }
-    else {
-      clase = "revisar";
-    }
+    /*
+     * Si el QR no contiene una URL,
+     * seguimos usando directamente
+     * lo que haya leído el scanner.
+     */
+
+  }
+
+
+  /*
+   * -------------------------------------------------------
+   * VALIDAR ID
+   * -------------------------------------------------------
+   */
+
+  if (
+    !/^DEM-\d{3}$/i.test(id)
+  ) {
+
+
+    document
+      .getElementById("resultado")
+      .innerHTML =
+
+      '<div class="error">' +
+
+      'QR NO VÁLIDO' +
+
+      '</div>' +
+
+      '<div class="id">' +
+
+      'Contenido detectado:' +
+
+      '<br>' +
+
+      id +
+
+      '</div>';
+
+
+    return;
+
+  }
+
+
+  /*
+   * Convertimos a mayúsculas.
+   *
+   * DEM-025
+   */
+
+  id =
+    id.toUpperCase();
+
+
+  /*
+   * Guardamos temporalmente
+   * el empleado.
+   *
+   * TODAVÍA NO SE REGISTRA.
+   */
+
+  empleadoDetectado =
+    id;
+
+
+  /*
+   * -------------------------------------------------------
+   * MOSTRAR CONFIRMACIÓN
+   * -------------------------------------------------------
+   */
+
+  document
+    .getElementById("resultado")
+    .innerHTML =
+
+    '<div class="nombre">' +
+
+    'Empleado detectado' +
+
+    '</div>' +
+
+    '<div class="id">' +
+
+    id +
+
+    '</div>' +
+
+    '<div class="confirmacion">' +
+
+    'Verifica el empleado y pulsa' +
+
+    '<br>' +
+
+    '<strong>REGISTRAR</strong>' +
+
+    '</div>';
+
+
+  /*
+   * Mostrar botón REGISTRAR
+   */
+
+  document
+    .getElementById("botonRegistrar")
+    .classList
+    .remove("oculto");
+
+
+  /*
+   * Detener lector.
+   *
+   * Así evitamos que se registre
+   * accidentalmente otro QR.
+   */
+
+  detenerScanner();
+
+}
+
+
+/* =========================================================
+   DETENER SCANNER
+   ========================================================= */
+
+
+function detenerScanner() {
+
+
+  if (!scanner) {
+
+    return;
+
+  }
+
+
+  try {
+
+    scanner.clear();
+
+  }
+
+  catch (error) {
+
+    console.log(
+      "No fue necesario limpiar scanner:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   BOTÓN REGISTRAR
+   ========================================================= */
+
+
+function confirmarRegistro() {
+
+
+  /*
+   * Seguridad:
+   * no hacemos nada si no hay empleado.
+   */
+
+  if (
+    !empleadoDetectado ||
+    procesando
+  ) {
+
+    return;
+
+  }
+
+
+  procesando = true;
+
+
+  /*
+   * Desactivar botón
+   */
+
+  const boton =
+    document
+      .getElementById(
+        "botonRegistrar"
+      );
+
+
+  boton.disabled =
+    true;
+
+
+  /*
+   * Mostrar mensaje
+   */
+
+  document
+    .getElementById("resultado")
+    .innerHTML =
+
+    '<div class="esperando">' +
+
+    'REGISTRANDO...' +
+
+    '<br><br>' +
+
+    'Por favor espera.' +
+
+    '</div>';
+
+
+  /*
+   * Construir URL.
+   *
+   * Ejemplo:
+   *
+   * .../exec?id=DEM-025
+   */
+
+  const url =
+
+    URL_APPS_SCRIPT +
+
+    "?id=" +
+
+    encodeURIComponent(
+      empleadoDetectado
+    );
+
+
+  /*
+   * Enviar registro a Apps Script.
+   */
+
+  fetch(url)
+
+    .then(
+      function(respuesta) {
+
+        return respuesta.json();
+
+      }
+    )
+
+    .then(
+      function(datos) {
+
+        mostrarResultado(
+          datos
+        );
+
+      }
+    )
+
+    .catch(
+      function(error) {
+
+        console.error(
+          error
+        );
+
+
+        document
+          .getElementById("resultado")
+          .innerHTML =
+
+          '<div class="error">' +
+
+          'NO SE PUDO REGISTRAR' +
+
+          '</div>' +
+
+          '<div class="confirmacion">' +
+
+          'Revisa la conexión a Internet.' +
+
+          '</div>';
+
+
+        boton.disabled =
+          false;
+
+
+        procesando =
+          false;
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   MOSTRAR RESULTADO
+   ========================================================= */
+
+
+function mostrarResultado(
+  datos
+) {
+
+
+  const resultado =
+    document
+      .getElementById(
+        "resultado"
+      );
+
+
+  /*
+   * Si Apps Script respondió
+   * con un error.
+   */
+
+  if (!datos.ok) {
 
 
     resultado.innerHTML =
 
-      '<div class="nombre">' +
-      (datos.nombre || "Empleado") +
+      '<div class="error">' +
+
+      'ERROR' +
+
       '</div>' +
 
-      '<div class="id">' +
-      datos.id +
-      '</div>' +
+      '<div class="confirmacion">' +
 
-      '<div class="tipo ' +
-      clase +
-      '">' +
-      datos.tipo +
-      '</div>' +
+      (
+        datos.mensaje ||
+        "No se pudo registrar."
+      ) +
 
-      '<div class="hora">' +
-      datos.hora +
-      '</div>';
-  }
-
-
-  function onScanSuccess(decodedText) {
-
-    if (procesando) {
-      return;
-    }
-
-    procesando = true;
-
-    document.getElementById("resultado").innerHTML =
-      '<div class="esperando">' +
-      'Registrando ' +
-      decodedText +
-      '...' +
       '</div>';
 
-    registrarAsistencia(decodedText);
+
+    document
+      .getElementById(
+        "botonRegistrar"
+      )
+      .disabled =
+      false;
+
+
+    procesando =
+      false;
+
+
+    return;
+
   }
 
 
-  function onScanFailure(error) {
-    // Normal mientras la cámara busca un QR.
+  /*
+   * Determinar color según
+   * Entrada / Salida / Revisar.
+   */
+
+  let clase =
+    "";
+
+
+  if (
+    datos.tipo ===
+    "Entrada"
+  ) {
+
+    clase =
+      "entrada";
+
   }
 
 
-  const scanner =
+  else if (
+    datos.tipo ===
+    "Salida"
+  ) {
+
+    clase =
+      "salida";
+
+  }
+
+
+  else {
+
+    clase =
+      "revisar";
+
+  }
+
+
+  /*
+   * Mostrar resultado final.
+   */
+
+  resultado.innerHTML =
+
+    '<div class="nombre">' +
+
+    (
+      datos.nombre ||
+      "Empleado"
+    ) +
+
+    '</div>' +
+
+    '<div class="id">' +
+
+    datos.id +
+
+    '</div>' +
+
+    '<div class="tipo ' +
+
+    clase +
+
+    '">' +
+
+    datos.tipo +
+
+    '</div>' +
+
+    '<div class="hora">' +
+
+    datos.hora +
+
+    '</div>';
+
+
+  /*
+   * Ocultar REGISTRAR
+   */
+
+  document
+    .getElementById(
+      "botonRegistrar"
+    )
+    .classList
+    .add("oculto");
+
+
+  /*
+   * Mostrar SIGUIENTE
+   */
+
+  document
+    .getElementById(
+      "botonSiguiente"
+    )
+    .classList
+    .remove("oculto");
+
+
+}
+
+
+/* =========================================================
+   BOTÓN LISTO / SIGUIENTE
+   ========================================================= */
+
+
+function volverAEscanear() {
+
+
+  /*
+   * Limpiar empleado anterior.
+   */
+
+  empleadoDetectado =
+    null;
+
+
+  procesando =
+    false;
+
+
+  /*
+   * Ocultar botones.
+   */
+
+  document
+    .getElementById(
+      "botonSiguiente"
+    )
+    .classList
+    .add("oculto");
+
+
+  document
+    .getElementById(
+      "botonRegistrar"
+    )
+    .classList
+    .add("oculto");
+
+
+  /*
+   * Restablecer mensaje.
+   */
+
+  document
+    .getElementById(
+      "resultado"
+    )
+    .innerHTML =
+
+    '<div class="esperando">' +
+
+    'Esperando QR...' +
+
+    '</div>';
+
+
+  /*
+   * Volver a iniciar cámara.
+   */
+
+  iniciarScanner();
+
+}
+
+
+/* =========================================================
+   INICIAR SCANNER
+   ========================================================= */
+
+
+function iniciarScanner() {
+
+
+  /*
+   * Crear nuevo lector.
+   */
+
+  scanner =
     new Html5QrcodeScanner(
+
       "reader",
+
       {
+
         fps: 10,
+
         qrbox: {
+
           width: 250,
+
           height: 250
+
         },
-        rememberLastUsedCamera: true
+
+        rememberLastUsedCamera:
+          true
+
       },
+
       false
+
     );
 
 
+  /*
+   * Iniciar lector.
+   */
+
   scanner.render(
+
     onScanSuccess,
+
     onScanFailure
+
   );
+
+}
+
+
+/* =========================================================
+   ERRORES DE LECTURA
+   ========================================================= */
+
+
+function onScanFailure(
+  error
+) {
+
+  /*
+   * NO hacemos nada aquí.
+   *
+   * Es completamente normal que
+   * el scanner genere errores mientras
+   * está buscando un QR.
+   */
+
+}
+
+
+/* =========================================================
+   INICIAR TODO
+   ========================================================= */
+
+
+iniciarScanner();
+
 
 </script>
 
 </body>
+
 </html>
