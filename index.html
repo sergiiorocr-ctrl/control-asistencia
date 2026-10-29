@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Control de Asistencia</title>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      text-align: center;
+    }
+
+    .contenedor {
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    .subtitulo {
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    #reader {
+      width: 100%;
+      max-width: 450px;
+      margin: auto;
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    #resultado {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 15px;
+      background: white;
+      min-height: 100px;
+    }
+
+    .nombre {
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    .id {
+      color: #666;
+      font-size: 18px;
+      margin-top: 5px;
+    }
+
+    .tipo {
+      font-size: 32px;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    .hora {
+      font-size: 20px;
+      margin-top: 8px;
+    }
+
+    .entrada {
+      color: #188038;
+    }
+
+    .salida {
+      color: #d93025;
+    }
+
+    .revisar {
+      color: #f29900;
+    }
+
+    .error {
+      color: #d93025;
+      font-weight: bold;
+    }
+
+    .esperando {
+      color: #777;
+      font-size: 18px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+  <h1>CONTROL DE ASISTENCIA</h1>
+
+  <div class="subtitulo">
+    Escanea el código QR del empleado
+  </div>
+
+  <div id="reader"></div>
+
+  <div id="resultado">
+    <div class="esperando">
+      Esperando QR...
+    </div>
+  </div>
+
+</div>
+
+
+<script>
+
+  /*
+   * AQUÍ VA EL ENLACE DE NUESTRA APLICACIÓN
+   * DE GOOGLE APPS SCRIPT.
+   *
+   * NO LO CAMBIES TODAVÍA.
+   */
+
+  const URL_APPS_SCRIPT =
+    "PON_AQUI_TU_URL_DE_APPS_SCRIPT";
+
+
+  let procesando = false;
+
+
+  async function registrarAsistencia(id) {
+
+    try {
+
+      const url =
+        URL_APPS_SCRIPT +
+        "?id=" +
+        encodeURIComponent(id);
+
+      const respuesta = await fetch(url);
+
+      const datos = await respuesta.json();
+
+      mostrarResultado(datos);
+
+    } catch (error) {
+
+      document.getElementById("resultado").innerHTML =
+        '<div class="error">' +
+        'No se pudo registrar. Revisa la conexión.' +
+        '</div>';
+
+    }
+
+    setTimeout(function() {
+      procesando = false;
+    }, 1500);
+  }
+
+
+  function mostrarResultado(datos) {
+
+    const resultado =
+      document.getElementById("resultado");
+
+    if (!datos.ok) {
+
+      resultado.innerHTML =
+        '<div class="error">' +
+        datos.mensaje +
+        '</div>';
+
+      return;
+    }
+
+
+    let clase = "";
+
+    if (datos.tipo === "Entrada") {
+      clase = "entrada";
+    }
+    else if (datos.tipo === "Salida") {
+      clase = "salida";
+    }
+    else {
+      clase = "revisar";
+    }
+
+
+    resultado.innerHTML =
+
+      '<div class="nombre">' +
+      (datos.nombre || "Empleado") +
+      '</div>' +
+
+      '<div class="id">' +
+      datos.id +
+      '</div>' +
+
+      '<div class="tipo ' +
+      clase +
+      '">' +
+      datos.tipo +
+      '</div>' +
+
+      '<div class="hora">' +
+      datos.hora +
+      '</div>';
+  }
+
+
+  function onScanSuccess(decodedText) {
+
+    if (procesando) {
+      return;
+    }
+
+    procesando = true;
+
+    document.getElementById("resultado").innerHTML =
+      '<div class="esperando">' +
+      'Registrando ' +
+      decodedText +
+      '...' +
+      '</div>';
+
+    registrarAsistencia(decodedText);
+  }
+
+
+  function onScanFailure(error) {
+    // Normal mientras la cámara busca un QR.
+  }
+
+
+  const scanner =
+    new Html5QrcodeScanner(
+      "reader",
+      {
+        fps: 10,
+        qrbox: {
+          width: 250,
+          height: 250
+        },
+        rememberLastUsedCamera: true
+      },
+      false
+    );
+
+
+  scanner.render(
+    onScanSuccess,
+    onScanFailure
+  );
+
+</script>
+
+</body>
+</html>
