@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 
@@ -14,280 +15,142 @@
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 
-
   <style>
 
     * {
       box-sizing: border-box;
     }
 
-
     body {
-
       margin: 0;
-
-      font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
+      font-family: Arial, Helvetica, sans-serif;
       background: #f2f2f2;
-
       text-align: center;
-
       color: #222;
-
     }
-
 
     .contenedor {
-
       width: 100%;
-
       max-width: 500px;
-
       margin: auto;
-
       padding: 20px;
-
     }
-
 
     h1 {
-
-      margin:
-        5px 0 5px 0;
-
+      margin: 5px 0 5px 0;
       font-size: 27px;
-
     }
-
 
     .subtitulo {
-
       color: #666;
-
       margin-bottom: 20px;
-
       font-size: 17px;
-
     }
-
-
-    /* =====================================================
-       LECTOR
-       ===================================================== */
 
     #reader {
-
       width: 100%;
-
       max-width: 450px;
-
       margin: auto;
-
       background: white;
-
       border-radius: 15px;
-
       overflow: hidden;
-
-      box-shadow:
-        0 2px 8px rgba(0,0,0,0.10);
-
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
     }
-
-
-    /* =====================================================
-       RESULTADO
-       ===================================================== */
 
     #resultado {
-
       margin-top: 20px;
-
       padding: 22px;
-
       border-radius: 15px;
-
       background: white;
-
       min-height: 170px;
-
-      box-shadow:
-        0 2px 8px rgba(0,0,0,0.08);
-
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
-
 
     .nombre {
-
       font-size: 25px;
-
       font-weight: bold;
-
       margin-bottom: 8px;
-
     }
-
 
     .id {
-
       color: #666;
-
       font-size: 18px;
-
       margin-top: 4px;
-
     }
-
 
     .dato {
-
       font-size: 17px;
-
       margin-top: 7px;
-
     }
-
 
     .dato strong {
-
       font-weight: bold;
-
     }
-
 
     .tipo {
-
       font-size: 32px;
-
       font-weight: bold;
-
       margin-top: 18px;
-
     }
-
 
     .hora {
-
       font-size: 20px;
-
       margin-top: 8px;
-
     }
-
 
     .entrada {
-
       color: #188038;
-
     }
-
 
     .salida {
-
       color: #d93025;
-
     }
-
 
     .revisar {
-
       color: #f29900;
-
     }
-
 
     .error {
-
       color: #d93025;
-
       font-weight: bold;
-
       font-size: 20px;
-
     }
-
 
     .esperando {
-
       color: #777;
-
       font-size: 18px;
-
     }
-
 
     .confirmacion {
-
       margin-top: 18px;
-
       color: #555;
-
       font-size: 17px;
-
     }
-
-
-    /* =====================================================
-       BOTONES
-       ===================================================== */
 
     button {
-
       width: 100%;
-
       max-width: 350px;
-
       padding: 18px;
-
       margin-top: 20px;
-
       border: none;
-
       border-radius: 12px;
-
       font-size: 22px;
-
       font-weight: bold;
-
       cursor: pointer;
-
     }
-
 
     #botonRegistrar {
-
       background: #188038;
-
       color: white;
-
     }
-
 
     #botonRegistrar:disabled {
-
       background: #aaa;
-
       cursor: not-allowed;
-
     }
-
-
-    #botonSiguiente {
-
-      background: #333;
-
-      color: white;
-
-    }
-
 
     .oculto {
-
       display: none;
-
     }
 
   </style>
@@ -313,16 +176,8 @@
   </div>
 
 
-  <!-- =====================================================
-       CÁMARA
-       ===================================================== -->
-
   <div id="reader"></div>
 
-
-  <!-- =====================================================
-       INFORMACIÓN
-       ===================================================== -->
 
   <div id="resultado">
 
@@ -335,9 +190,15 @@
   </div>
 
 
-  <!-- =====================================================
-       REGISTRAR
-       ===================================================== -->
+  <!--
+    ÚNICO BOTÓN DEL SISTEMA
+
+    Primero:
+    REGISTRAR
+
+    Después de registrar:
+    NUEVO REGISTRO
+  -->
 
   <button
     id="botonRegistrar"
@@ -350,21 +211,6 @@
   </button>
 
 
-  <!-- =====================================================
-       SIGUIENTE
-       ===================================================== -->
-
-  <button
-    id="botonSiguiente"
-    class="oculto"
-    onclick="volverAEscanear()"
-  >
-
-    LISTO / SIGUIENTE
-
-  </button>
-
-
 </div>
 
 
@@ -372,30 +218,27 @@
 <script>
 
 
-/* ==========================================================
+/* ============================================================
    CONFIGURACIÓN
-   ========================================================== */
+   ============================================================ */
 
-
-/*
- * URL DE TU APLICACIÓN WEB
- */
 
 const URL_APPS_SCRIPT =
   "https://script.google.com/macros/s/AKfycbwClqRJkgsM5iVOQqpOJP_YWicN-RII9OGOdxzFmb2BPNEhaa6HcHgWZVkmHSjoMow1/exec";
 
 
 /*
- * Parámetro que contienen tus QR actuales.
- */
+  Parámetro que contiene el ID dentro de los QR
+  actuales de Google Forms.
+*/
 
 const PARAMETRO_ID =
   "entry.1163066923";
 
 
-/* ==========================================================
+/* ============================================================
    VARIABLES
-   ========================================================== */
+   ============================================================ */
 
 
 let html5QrCode = null;
@@ -409,41 +252,33 @@ let procesando = false;
 let scannerActivo = false;
 
 
-/* ==========================================================
-   EXTRAER ID DEL QR
-   ========================================================== */
+/* ============================================================
+   OBTENER ID DESDE EL QR
+   ============================================================ */
 
 
-function obtenerIDDesdeQR(
-  contenido
-) {
+function obtenerIDDesdeQR(contenido) {
 
-
-  let id =
-    contenido.trim();
+  let id = contenido.trim();
 
 
   /*
-   * Intentamos interpretar el QR
-   * como una URL.
-   */
+    Primero intentamos saber si el QR contiene
+    una URL de Google Forms.
+  */
 
   try {
 
-    const url =
-      new URL(id);
-
+    const url = new URL(id);
 
     const empleadoID =
       url.searchParams.get(
         PARAMETRO_ID
       );
 
-
     if (empleadoID) {
 
-      id =
-        empleadoID.trim();
+      id = empleadoID.trim();
 
     }
 
@@ -452,9 +287,10 @@ function obtenerIDDesdeQR(
   catch (error) {
 
     /*
-     * Si no es una URL,
-     * usamos directamente el contenido.
-     */
+      Si no es una URL,
+      simplemente usamos el contenido
+      directamente como ID.
+    */
 
   }
 
@@ -464,20 +300,18 @@ function obtenerIDDesdeQR(
 }
 
 
-/* ==========================================================
-   QR DETECTADO
-   ========================================================== */
+/* ============================================================
+   CUANDO SE DETECTA UN QR
+   ============================================================ */
 
 
-async function onScanSuccess(
-  decodedText
-) {
+async function onScanSuccess(decodedText) {
 
 
   /*
-   * Si ya estamos procesando
-   * un empleado, ignoramos otros QR.
-   */
+    Evita que el mismo QR se procese
+    varias veces mientras se está consultando.
+  */
 
   if (
     empleadoDetectado ||
@@ -496,32 +330,25 @@ async function onScanSuccess(
 
 
   /*
-   * Validar ID.
-   */
+    Validar ID.
+  */
 
   if (
     !/^DEM-\d{3}$/.test(id)
   ) {
-
 
     document
       .getElementById("resultado")
       .innerHTML =
 
       '<div class="error">' +
-
       'QR NO VÁLIDO' +
-
       '</div>' +
 
       '<div class="id">' +
-
       'ID detectado: ' +
-
       id +
-
       '</div>';
-
 
     return;
 
@@ -529,43 +356,32 @@ async function onScanSuccess(
 
 
   /*
-   * Guardar ID temporalmente.
-   */
+    Guardamos temporalmente el empleado.
+  */
 
-  empleadoDetectado =
-    id;
+  empleadoDetectado = id;
 
 
   /*
-   * Evitar lecturas repetidas.
-   */
+    Detenemos la cámara mientras
+    consultamos los datos.
+  */
 
   await detenerCamara();
 
-
-  /*
-   * Mostrar que estamos buscando
-   * la información.
-   */
 
   document
     .getElementById("resultado")
     .innerHTML =
 
     '<div class="esperando">' +
-
     'Consultando empleado...' +
-
     '</div>';
 
 
   /*
-   * Consultar Apps Script.
-   *
-   * IMPORTANTE:
-   * Esto solamente consulta.
-   * Todavía NO registra asistencia.
-   */
+    Consultar Apps Script.
+  */
 
   const url =
 
@@ -578,7 +394,6 @@ async function onScanSuccess(
 
   try {
 
-
     const respuesta =
       await fetch(url);
 
@@ -588,14 +403,12 @@ async function onScanSuccess(
 
 
     /*
-     * Si hubo error.
-     */
+      Si Apps Script devuelve error.
+    */
 
     if (!datos.ok) {
 
-
-      empleadoDetectado =
-        null;
+      empleadoDetectado = null;
 
 
       document
@@ -603,9 +416,7 @@ async function onScanSuccess(
         .innerHTML =
 
         '<div class="error">' +
-
         'ERROR' +
-
         '</div>' +
 
         '<div class="confirmacion">' +
@@ -620,23 +431,21 @@ async function onScanSuccess(
 
       iniciarCamara();
 
-
       return;
 
     }
 
 
     /*
-     * Guardar información.
-     */
+      Guardamos los datos del empleado.
+    */
 
-    empleadoInfo =
-      datos;
+    empleadoInfo = datos;
 
 
     /*
-     * Mostrar empleado.
-     */
+      Mostramos los datos.
+    */
 
     mostrarEmpleado();
 
@@ -644,14 +453,10 @@ async function onScanSuccess(
 
   catch (error) {
 
-
-    console.error(
-      error
-    );
+    console.error(error);
 
 
-    empleadoDetectado =
-      null;
+    empleadoDetectado = null;
 
 
     document
@@ -659,21 +464,13 @@ async function onScanSuccess(
       .innerHTML =
 
       '<div class="error">' +
-
       'NO SE PUDO CONSULTAR' +
-
       '</div>' +
 
       '<div class="confirmacion">' +
-
       'Revisa la conexión a Internet.' +
-
       '</div>';
 
-
-    /*
-     * Volver a activar cámara.
-     */
 
     iniciarCamara();
 
@@ -682,9 +479,9 @@ async function onScanSuccess(
 }
 
 
-/* ==========================================================
+/* ============================================================
    MOSTRAR EMPLEADO
-   ========================================================== */
+   ============================================================ */
 
 
 function mostrarEmpleado() {
@@ -698,94 +495,71 @@ function mostrarEmpleado() {
     .getElementById("resultado")
     .innerHTML =
 
-
     '<div class="nombre">' +
-
     datos.nombre +
-
     '</div>' +
-
 
     '<div class="id">' +
-
     datos.id +
-
     '</div>' +
 
-
     '<div class="dato">' +
-
     '<strong>Área:</strong> ' +
-
     datos.area +
-
     '</div>' +
 
-
     '<div class="dato">' +
-
     '<strong>Contrato:</strong> ' +
-
     datos.contrato +
-
     '</div>' +
-
 
     '<div class="dato">' +
-
     '<strong>Supervisor:</strong> ' +
-
     datos.supervisor +
-
     '</div>' +
-
 
     '<div class="confirmacion">' +
-
     'Verifica los datos y pulsa ' +
-
     '<strong>REGISTRAR</strong>' +
-
     '</div>';
 
 
   /*
-   * Mostrar botón REGISTRAR.
-   */
+    Configurar el único botón.
+  */
 
-  document
-    .getElementById(
+  const boton =
+    document.getElementById(
       "botonRegistrar"
-    )
-    .classList
-    .remove("oculto");
+    );
 
 
-  /*
-   * Asegurar que esté habilitado.
-   */
+  boton.innerText =
+    "REGISTRAR";
 
-  document
-    .getElementById(
-      "botonRegistrar"
-    )
-    .disabled =
+
+  boton.onclick =
+    confirmarRegistro;
+
+
+  boton.disabled =
     false;
+
+
+  boton.classList.remove(
+    "oculto"
+  );
 
 }
 
 
-/* ==========================================================
-   REGISTRAR
-   ========================================================== */
+/* ============================================================
+   REGISTRAR ASISTENCIA
+   ============================================================ */
 
 
 async function confirmarRegistro() {
 
-
-  /*
-   * Seguridad.
-   */
 
   if (
     !empleadoDetectado ||
@@ -797,43 +571,31 @@ async function confirmarRegistro() {
   }
 
 
-  procesando =
-    true;
+  procesando = true;
 
-
-  /*
-   * Deshabilitar botón.
-   */
 
   const boton =
-    document
-      .getElementById(
-        "botonRegistrar"
-      );
+    document.getElementById(
+      "botonRegistrar"
+    );
 
 
-  boton.disabled =
-    true;
+  boton.disabled = true;
 
-
-  /*
-   * Mostrar mensaje.
-   */
 
   document
     .getElementById("resultado")
     .innerHTML =
 
     '<div class="esperando">' +
-
     'REGISTRANDO...' +
-
     '</div>';
 
 
   /*
-   * URL de registro.
-   */
+    Llamamos a Apps Script
+    para registrar la asistencia.
+  */
 
   const url =
 
@@ -848,7 +610,6 @@ async function confirmarRegistro() {
 
   try {
 
-
     const respuesta =
       await fetch(url);
 
@@ -857,22 +618,13 @@ async function confirmarRegistro() {
       await respuesta.json();
 
 
-    /*
-     * Mostrar resultado.
-     */
-
-    mostrarResultado(
-      datos
-    );
+    mostrarResultado(datos);
 
   }
 
   catch (error) {
 
-
-    console.error(
-      error
-    );
+    console.error(error);
 
 
     document
@@ -880,60 +632,47 @@ async function confirmarRegistro() {
       .innerHTML =
 
       '<div class="error">' +
-
       'NO SE PUDO REGISTRAR' +
-
       '</div>' +
 
       '<div class="confirmacion">' +
-
       'Revisa la conexión a Internet.' +
-
       '</div>';
 
 
-    boton.disabled =
-      false;
+    boton.disabled = false;
 
-
-    procesando =
-      false;
+    procesando = false;
 
   }
 
 }
 
 
-/* ==========================================================
-   RESULTADO DEL REGISTRO
-   ========================================================== */
+/* ============================================================
+   MOSTRAR RESULTADO DEL REGISTRO
+   ============================================================ */
 
 
-function mostrarResultado(
-  datos
-) {
+function mostrarResultado(datos) {
 
 
   const resultado =
-    document
-      .getElementById(
-        "resultado"
-      );
+    document.getElementById(
+      "resultado"
+    );
 
 
   /*
-   * Error.
-   */
+    Si Apps Script devuelve error.
+  */
 
   if (!datos.ok) {
-
 
     resultado.innerHTML =
 
       '<div class="error">' +
-
       'ERROR' +
-
       '</div>' +
 
       '<div class="confirmacion">' +
@@ -946,17 +685,15 @@ function mostrarResultado(
       '</div>';
 
 
-    document
-      .getElementById(
+    const boton =
+      document.getElementById(
         "botonRegistrar"
-      )
-      .disabled =
-      false;
+      );
 
 
-    procesando =
-      false;
+    boton.disabled = false;
 
+    procesando = false;
 
     return;
 
@@ -964,224 +701,186 @@ function mostrarResultado(
 
 
   /*
-   * Determinar color.
-   */
+    Elegir color según el tipo.
+  */
 
-  let clase =
-    "";
+  let clase = "";
 
 
   if (
-    datos.tipo ===
-    "Entrada"
+    datos.tipo === "Entrada"
   ) {
 
-    clase =
-      "entrada";
+    clase = "entrada";
 
   }
 
   else if (
-    datos.tipo ===
-    "Salida"
+    datos.tipo === "Salida"
   ) {
 
-    clase =
-      "salida";
+    clase = "salida";
 
   }
 
   else {
 
-    clase =
-      "revisar";
+    clase = "revisar";
 
   }
 
 
   /*
-   * Mostrar resultado.
-   */
+    Mostrar resultado.
+  */
 
   resultado.innerHTML =
 
     '<div class="nombre">' +
-
     datos.nombre +
-
     '</div>' +
-
 
     '<div class="id">' +
-
     datos.id +
-
     '</div>' +
 
-
     '<div class="dato">' +
-
     '<strong>Área:</strong> ' +
-
     datos.area +
-
     '</div>' +
 
-
     '<div class="dato">' +
-
     '<strong>Contrato:</strong> ' +
-
     datos.contrato +
-
     '</div>' +
-
 
     '<div class="dato">' +
-
     '<strong>Supervisor:</strong> ' +
-
     datos.supervisor +
-
     '</div>' +
-
 
     '<div class="tipo ' +
-
     clase +
-
     '">' +
-
     datos.tipo +
-
     '</div>' +
 
-
     '<div class="hora">' +
-
     datos.hora +
-
     '</div>';
 
 
   /*
-   * Ocultar REGISTRAR.
-   */
+    El mismo botón ahora sirve
+    para iniciar un nuevo registro.
+  */
 
-  document
-    .getElementById(
+  const boton =
+    document.getElementById(
       "botonRegistrar"
-    )
-    .classList
-    .add("oculto");
+    );
 
 
-  /*
-   * Mostrar SIGUIENTE.
-   */
+  boton.innerText =
+    "NUEVO REGISTRO";
 
-  document
-    .getElementById(
-      "botonSiguiente"
-    )
-    .classList
-    .remove("oculto");
+
+  boton.onclick =
+    volverAEscanear;
+
+
+  boton.disabled = false;
+
+
+  boton.classList.remove(
+    "oculto"
+  );
+
+
+  procesando = false;
 
 }
 
 
-/* ==========================================================
-   SIGUIENTE
-   ========================================================== */
+/* ============================================================
+   NUEVO REGISTRO
+   ============================================================ */
 
 
-async function volverAEscanear() {
-
-
-  /*
-   * Limpiar datos anteriores.
-   */
-
-  empleadoDetectado =
-    null;
-
-  empleadoInfo =
-    null;
-
-  procesando =
-    false;
+function volverAEscanear() {
 
 
   /*
-   * Ocultar botones.
-   */
+    Limpiar empleado anterior.
+  */
 
-  document
-    .getElementById(
+  empleadoDetectado = null;
+
+  empleadoInfo = null;
+
+  procesando = false;
+
+
+  /*
+    Configurar nuevamente el botón.
+  */
+
+  const boton =
+    document.getElementById(
       "botonRegistrar"
-    )
-    .classList
-    .add("oculto");
+    );
 
 
-  document
-    .getElementById(
-      "botonSiguiente"
-    )
-    .classList
-    .add("oculto");
+  boton.innerText =
+    "REGISTRAR";
 
 
-  /*
-   * Habilitar botón.
-   */
+  boton.onclick =
+    confirmarRegistro;
 
-  document
-    .getElementById(
-      "botonRegistrar"
-    )
-    .disabled =
-    false;
+
+  boton.disabled = false;
+
+
+  boton.classList.add(
+    "oculto"
+  );
 
 
   /*
-   * Mensaje.
-   */
+    Limpiar resultado.
+  */
 
   document
-    .getElementById(
-      "resultado"
-    )
+    .getElementById("resultado")
     .innerHTML =
 
     '<div class="esperando">' +
-
     'Esperando QR...' +
-
     '</div>';
 
 
   /*
-   * Iniciar nuevamente la cámara.
-   */
+    Volver a activar cámara.
+  */
 
   iniciarCamara();
 
 }
 
 
-/* ==========================================================
+/* ============================================================
    INICIAR CÁMARA
-   ========================================================== */
+   ============================================================ */
 
 
 function iniciarCamara() {
 
 
   /*
-   * Si ya está funcionando,
-   * no crear otra.
-   */
+    Si ya está funcionando,
+    no hacemos nada.
+  */
 
   if (
     scannerActivo
@@ -1192,13 +891,12 @@ function iniciarCamara() {
   }
 
 
-  scannerActivo =
-    true;
+  scannerActivo = true;
 
 
   /*
-   * Crear lector.
-   */
+    Crear el lector.
+  */
 
   html5QrCode =
     new Html5Qrcode(
@@ -1206,23 +904,13 @@ function iniciarCamara() {
     );
 
 
-  /*
-   * Configuración.
-   *
-   * facingMode: environment
-   * intenta utilizar la cámara trasera.
-   */
-
   const configuracion = {
 
     fps: 10,
 
     qrbox: {
-
       width: 250,
-
       height: 250
-
     },
 
     aspectRatio: 1.0
@@ -1231,18 +919,17 @@ function iniciarCamara() {
 
 
   /*
-   * Intentar primero cámara trasera.
-   */
+    Primero intentamos abrir
+    específicamente la cámara trasera.
+  */
 
   html5QrCode
     .start(
 
       {
-        facingMode:
-          {
-            exact:
-              "environment"
-          }
+        facingMode: {
+          exact: "environment"
+        }
       },
 
       configuracion,
@@ -1257,39 +944,32 @@ function iniciarCamara() {
 
       function(error) {
 
-
         console.log(
           "No se pudo iniciar la cámara trasera:",
           error
         );
 
 
-        /*
-         * Si el teléfono no permite
-         * seleccionar environment de
-         * esa manera, intentamos
-         * simplemente environment.
-         */
-
         iniciarCamaraAlternativa();
 
       }
+
     );
 
 }
 
 
-/* ==========================================================
+/* ============================================================
    CÁMARA ALTERNATIVA
-   ========================================================== */
+   ============================================================ */
 
 
 function iniciarCamaraAlternativa() {
 
 
   /*
-   * Destruir instancia anterior.
-   */
+    Intentamos limpiar el lector anterior.
+  */
 
   try {
 
@@ -1300,6 +980,10 @@ function iniciarCamaraAlternativa() {
   catch (error) {}
 
 
+  /*
+    Crear un nuevo lector.
+  */
+
   html5QrCode =
     new Html5Qrcode(
       "reader"
@@ -1311,11 +995,8 @@ function iniciarCamaraAlternativa() {
     fps: 10,
 
     qrbox: {
-
       width: 250,
-
       height: 250
-
     },
 
     aspectRatio: 1.0
@@ -1323,12 +1004,15 @@ function iniciarCamaraAlternativa() {
   };
 
 
+  /*
+    Segundo intento de cámara trasera.
+  */
+
   html5QrCode
     .start(
 
       {
-        facingMode:
-          "environment"
+        facingMode: "environment"
       },
 
       configuracion,
@@ -1343,14 +1027,10 @@ function iniciarCamaraAlternativa() {
 
       function(error) {
 
-
-        console.error(
-          error
-        );
+        console.error(error);
 
 
-        scannerActivo =
-          false;
+        scannerActivo = false;
 
 
         document
@@ -1360,26 +1040,23 @@ function iniciarCamaraAlternativa() {
           .innerHTML =
 
           '<div class="error">' +
-
           'NO SE PUDO ACTIVAR LA CÁMARA' +
-
           '</div>' +
 
           '<div class="confirmacion">' +
-
           'Revisa los permisos de cámara del navegador.' +
-
           '</div>';
 
       }
+
     );
 
 }
 
 
-/* ==========================================================
+/* ============================================================
    DETENER CÁMARA
-   ========================================================== */
+   ============================================================ */
 
 
 async function detenerCamara() {
@@ -1411,34 +1088,30 @@ async function detenerCamara() {
   }
 
 
-  scannerActivo =
-    false;
+  scannerActivo = false;
 
 }
 
 
-/* ==========================================================
-   ERROR NORMAL DEL SCANNER
-   ========================================================== */
+/* ============================================================
+   ERROR DE ESCANEO
+   ============================================================ */
 
 
-function onScanFailure(
-  error
-) {
+function onScanFailure(error) {
 
   /*
-   * No hacemos nada.
-   *
-   * El scanner genera estos mensajes
-   * constantemente mientras busca un QR.
-   */
+    No mostramos errores de lectura
+    porque son normales mientras
+    la cámara está buscando un QR.
+  */
 
 }
 
 
-/* ==========================================================
-   INICIAR
-   ========================================================== */
+/* ============================================================
+   INICIAR AUTOMÁTICAMENTE
+   ============================================================ */
 
 
 window.addEventListener(
@@ -1457,3 +1130,4 @@ window.addEventListener(
 </body>
 
 </html>
+```
